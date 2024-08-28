@@ -14,4 +14,3 @@ updates:
     directory: ".devcontainer/devcontainer.json"
     schedule:
       interval: weekly
-
