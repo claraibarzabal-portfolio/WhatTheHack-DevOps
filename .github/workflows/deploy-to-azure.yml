@@ -1,4 +1,5 @@
-name: Deploy to Azure
+name: Deploy to Azure Container Apps
+
 on:
   push:
     branches:
@@ -7,20 +8,34 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Set up Azure CLI
+        uses: azure/setup-azure@v1
+        with:
+          azure-version: '2.0.45'
 
       - name: Log in to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Build and deploy Container App
-        uses: azure/container-apps-deploy-action@v1
-        with:
-          appSourcePath: ${{ github.workspace }}
-          acrName: ${{ vars.AZURE_PREFIX }}acr
-          resourceGroup: ${{ vars.AZURE_RG }}
-          containerAppName: ${{ vars.AZURE_PREFIX }}containerapp
-          containerAppEnvironment: ${{ vars.AZURE_PREFIX }}containerappenvironment
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.AZURE_PREFIX }}acr.azurecr.io/${{ secrets.AZURE_PREFIX }}containerapp:latest .
+
+      - name: Push Docker image to Azure Container Registry
+        run: |
+          docker push ${{ secrets.AZURE_PREFIX }}acr.azurecr.io/${{ secrets.AZURE_PREFIX }}containerapp:latest
+
+      - name: Deploy to Azure Container Apps
+        run: |
+          az containerapp revision copy \
+            --name ${{ secrets.AZURE_PREFIX }}containerapp \
+            --resource-group ${{ secrets.AZURE_PREFIX }}containerappenvironment \
+            --cpu 0.5 \
+            --memory 1.0Gi \
+            --image ${{ secrets.AZURE_PREFIX }}acr.azurecr.io/${{ secrets.AZURE_PREFIX }}containerapp:latest
