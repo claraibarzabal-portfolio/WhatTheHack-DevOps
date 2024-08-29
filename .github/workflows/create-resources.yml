@@ -1,19 +1,15 @@
 name: Create Azure resources
-on:
-  workflow_dispatch:
+on: [workflow_dispatch]
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: venv  
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Log into Azure
-        uses: azure/login@v1
+      - uses: actions/checkout@main
+      - uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Create resources
+      - name: create resources
         uses: azure/arm-deploy@v1
         with:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
@@ -21,3 +17,4 @@ jobs:
           template: ${{ github.workspace }}/config/main.bicep
           parameters: 'namePrefix=${{ secrets.AZURE_PREFIX }}'
           failOnStdErr: false
+
