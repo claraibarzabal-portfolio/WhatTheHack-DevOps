@@ -15,9 +15,15 @@ const Hours = () => {
     <div>
       <h2>Horas de Operación</h2>
       <p>{hours}</p>
+      <img 
+        src="https://i.pinimg.com/736x/4f/a6/65/4fa66567c82cd5f8708b2a2e2c160229.jpg" 
+        alt="Un perro adorable" 
+        style={{ width: '300px', height: 'auto', display: 'block', marginTop: '10px' }} 
+      />
     </div>
   );
 };
 
 export default Hours;
+
 
